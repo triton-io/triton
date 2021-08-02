@@ -1,0 +1,20 @@
+# permissions for end users to view deployflows.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: deployflow-viewer-role
+rules:
+- apiGroups:
+  - apps.triton.io
+  resources:
+  - deployflows
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - apps.triton.io
+  resources:
+  - deployflows/status
+  verbs:
+  - get

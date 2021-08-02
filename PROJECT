@@ -1,0 +1,7 @@
+domain: triton.io
+repo: github.com/triton-io/triton
+resources:
+- group: apps
+  kind: DeployFlow
+  version: v1alpha1
+version: "2"
