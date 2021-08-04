@@ -1,5 +1,5 @@
 logs/
-bin/triton
+bin/
 .idea/
 application.json
 

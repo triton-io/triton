@@ -1,7 +1,16 @@
 domain: triton.io
-repo: github.com/triton-io/triton
+layout:
+- go.kubebuilder.io/v3
+projectName: triton
+repo: github.com/gin-gonic
 resources:
-- group: apps
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: triton.io
+  group: apps
   kind: DeployFlow
+  path: github.com/gin-gonic/api/v1alpha1
   version: v1alpha1
-version: "2"
+version: "3"

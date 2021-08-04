@@ -21,6 +21,12 @@ rules:
 - apiGroups:
   - apps.triton.io
   resources:
+  - deployflows/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - apps.triton.io
+  resources:
   - deployflows/status
   verbs:
   - get
