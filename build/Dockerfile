@@ -1,7 +1,12 @@
 # Build the manager binary
-FROM golang:1.16 as builder
+FROM golang:1.16.6 as builder
 
-WORKDIR /workspace
+ARG VERSION=0.0.1
+ARG BUILD_NUMBER=0
+ARG GIT_COMMIT=0
+
+WORKDIR /triton
+ENV GOPROXY=https://goproxy.cn,direct
 # Copy the Go Modules manifests
 COPY go.mod go.mod
 COPY go.sum go.sum
@@ -10,18 +15,19 @@ COPY go.sum go.sum
 RUN go mod download
 
 # Copy the go source
-COPY main.go main.go
-COPY api/ api/
-COPY controllers/ controllers/
+COPY cmd cmd/
+COPY api api/
+COPY pkg pkg/
+COPY version version/
 
 # Build
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o manager main.go
+RUN CGO_ENABLED=0 go build -ldflags "-extldflags '-static' -X 'triton/version.Version=${VERSION}' -X 'triton/version.BuildNumber=${BUILD_NUMBER}' -X 'triton/version.GitCommit=${GIT_COMMIT}'" -o triton cmd/triton/main.go
 
 # Use distroless as minimal base image to package the manager binary
 # Refer to https://github.com/GoogleContainerTools/distroless for more details
 FROM gcr.io/distroless/static:nonroot
-WORKDIR /
-COPY --from=builder /workspace/manager .
+WORKDIR /app
+COPY --from=builder /triton/triton .
 USER 65532:65532
 
-ENTRYPOINT ["/manager"]
+ENTRYPOINT ["/app/triton"]

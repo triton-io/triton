@@ -1,5 +1,5 @@
 /*
-Copyright 2021.
+Copyright 2021 The Triton Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import (
 	"flag"
 	"os"
 
+	"github.com/triton-io/triton/pkg/controllers"
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -32,7 +33,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	appsv1alpha1 "github.com/triton-io/triton/api/v1alpha1"
-	"github.com/triton-io/triton/controllers"
 	//+kubebuilder:scaffold:imports
 )
 
