@@ -21,7 +21,7 @@ import (
 	"flag"
 
 	kruiseappsv1alpha1 "github.com/openkruise/kruise-api/apps/v1alpha1"
-	tritonappsv1alpha1 "github.com/triton-io/triton/api/v1alpha1"
+	tritonappsv1alpha1 "github.com/triton-io/triton/apis/apps/v1alpha1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/klog"

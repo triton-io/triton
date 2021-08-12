@@ -23,7 +23,7 @@ import (
 	"os"
 
 	kruiseappsv1alpha1 "github.com/openkruise/kruise-api/apps/v1alpha1"
-	tritonappsv1alpha1 "github.com/triton-io/triton/api/v1alpha1"
+	tritonappsv1alpha1 "github.com/triton-io/triton/apis/apps/v1alpha1"
 	"github.com/triton-io/triton/pkg/kube/controllers"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -135,7 +135,6 @@ func main() {
 	}
 
 	go func() {
-
 		setupLog.Info("setup controllers")
 		if err = controllers.SetupWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to setup controllers")
