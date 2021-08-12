@@ -6,7 +6,7 @@ import (
 	"time"
 
 	kruiseappsv1alpha1 "github.com/openkruise/kruise-api/apps/v1alpha1"
-	tritonappsv1alpha1 "github.com/triton-io/triton/api/v1alpha1"
+	tritonappsv1alpha1 "github.com/triton-io/triton/apis/apps/v1alpha1"
 	"github.com/triton-io/triton/pkg/services/base"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

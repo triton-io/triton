@@ -2,7 +2,7 @@ package fetcher
 
 import (
 	kruiseappsv1alpha1 "github.com/openkruise/kruise-api/apps/v1alpha1"
-	tritonappsv1alpha1 "github.com/triton-io/triton/api/v1alpha1"
+	tritonappsv1alpha1 "github.com/triton-io/triton/apis/apps/v1alpha1"
 	"github.com/triton-io/triton/pkg/setting"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

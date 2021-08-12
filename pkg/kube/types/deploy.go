@@ -6,7 +6,7 @@ import (
 	"math"
 	"strings"
 
-	tritonappsv1alpha1 "github.com/triton-io/triton/api/v1alpha1"
+	tritonappsv1alpha1 "github.com/triton-io/triton/apis/apps/v1alpha1"
 	podservice "github.com/triton-io/triton/pkg/services/pod"
 	"github.com/triton-io/triton/pkg/setting"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
