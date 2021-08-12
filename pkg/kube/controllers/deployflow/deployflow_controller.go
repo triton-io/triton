@@ -108,7 +108,6 @@ var _ reconcile.Reconciler = &DeployFlowReconciler{}
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
 // the DeployFlow object against the actual cluster state, and then
 // perform operations to make the cluster state reflect the state specified by
 // the user.
@@ -118,11 +117,11 @@ var _ reconcile.Reconciler = &DeployFlowReconciler{}
 
 // Reconcile reads that state of the cluster for a CloneSet object and makes changes based on the state read
 // and what is in the CloneSet.Spec
-func (r *DeployFlowReconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {
-	return r.reconcileFunc(context.TODO(), request)
+func (r *DeployFlowReconciler) Reconcile(req reconcile.Request) (reconcile.Result, error) {
+	return r.reconcileFunc(context.TODO(), req)
 }
 
-func (r *DeployFlowReconciler) doReconcile(ctx context.Context, request reconcile.Request) (res reconcile.Result, retErr error) {
+func (r *DeployFlowReconciler) doReconcile(ctx context.Context, req reconcile.Request) (res reconcile.Result, retErr error) {
 	_ = log.FromContext(ctx)
 
 	// your logic here
