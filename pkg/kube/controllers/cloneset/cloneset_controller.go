@@ -30,6 +30,8 @@ type CloneSetReconciler struct {
 	client.Client
 	Scheme *runtime.Scheme
 	logger *logrus.Entry
+
+	reconcileFunc func(ctx context.Context, request reconcile.Request) (reconcile.Result, error)
 }
 
 // Add creates a new CloneSet Controller and adds it to the Manager with default RBAC. The Manager will set fields on the Controller
@@ -58,18 +60,28 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 func newCloneSetReconciler(mgr ctrl.Manager) *CloneSetReconciler {
 	logger := log.WithField("controller", "CloneSet")
 
-	return &CloneSetReconciler{
+	reconciler := &CloneSetReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 		logger: logger,
 	}
+	reconciler.reconcileFunc = reconciler.doReconcile
+
+	return reconciler
 }
+
+// Reconcile reads that state of the cluster for a CloneSet object and makes changes based on the state read
+// and what is in the CloneSet.Spec
+func (r *CloneSetReconciler) Reconcile(req reconcile.Request) (reconcile.Result, error) {
+	return r.reconcileFunc(context.TODO(), req)
+}
+
+var _ reconcile.Reconciler = &CloneSetReconciler{}
 
 // +kubebuilder:rbac:groups=apps.kruise.io,resources=clonesets,verbs=get;list;watch
 // +kubebuilder:rbac:groups=apps.kruise.io,resources=clonesets/status,verbs=get
 
-func (r *CloneSetReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	ctx := context.Background()
+func (r *CloneSetReconciler) doReconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	logger := r.logger.WithField("cloneSet", req.NamespacedName)
 
 	cs := &kruiseappsv1alpha1.CloneSet{}
