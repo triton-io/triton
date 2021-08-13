@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	tritonappsv1alpha1 "github.com/triton-io/triton/apis/apps/v1alpha1"
+	"github.com/triton-io/triton/pkg/kube/types/workload"
 	podservice "github.com/triton-io/triton/pkg/services/pod"
 	"github.com/triton-io/triton/pkg/setting"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -60,6 +61,18 @@ func FromDeploy(d *tritonappsv1alpha1.DeployFlow) *Deploy {
 // Unwrap returns the tritonappsv1alpha1.DeployFlow object.
 func (d *Deploy) Unwrap() *tritonappsv1alpha1.DeployFlow {
 	return d.DeployFlow
+}
+
+func (d *Deploy) GetInstanceName() string {
+	return d.Spec.Application.InstanceName
+}
+
+func (d *Deploy) GetCloneSetLabels() labels.Set {
+
+	return d.getDefaultLabels()
+}
+func (d *Deploy) getDefaultLabels() labels.Set {
+	return workload.GetDefaultLabels(d.Spec.Application.AppName, d.Spec.Application.InstanceName, d.Spec.Application.AppID, d.Spec.Application.GroupID)
 }
 
 // String returns the general purpose string representation

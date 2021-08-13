@@ -35,11 +35,11 @@ func GetCloneSetsInCache(ns string, cl client.Client) ([]*kruiseappsv1alpha1.Clo
 }
 
 func GetCloneSetInCacheByDeploy(deploy *tritonappsv1alpha1.DeployFlow, cl client.Client) (*kruiseappsv1alpha1.CloneSet, bool, error) {
-	return GetCloneSetInCache(deploy.Namespace, deploy.Spec.Application.AppName, cl)
+	return GetCloneSetInCache(deploy.Namespace, deploy.Spec.Application.InstanceName, cl)
 }
 
 func GetCloneSetInCacheOwnedByDeploy(deploy *tritonappsv1alpha1.DeployFlow, cl client.Client) (*kruiseappsv1alpha1.CloneSet, bool, error) {
-	cs, found, err := GetCloneSetInCache(deploy.Namespace, deploy.Spec.Application.AppName, cl)
+	cs, found, err := GetCloneSetInCache(deploy.Namespace, deploy.Spec.Application.InstanceName, cl)
 	if cs != nil {
 		if !metav1.IsControlledBy(cs, deploy) {
 			cs = nil
