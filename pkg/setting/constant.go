@@ -2,10 +2,16 @@ package setting
 
 // constant.go stores things which never change.
 const (
+
+	// resource status.
+	DeploymentInProgress = "InProgress"
+	DeploymentReady      = "Ready"
+
 	PodPending         = "Pending"
 	PodRunning         = "Running"
 	PodReady           = "Ready"
 	PodFailed          = "Failed"
+	PodOutdated        = "Outdated"
 	ContainersReady    = "ContainersReady"
 	PodPullInFailed    = "PullInFailed"
 	PodPullInSucceeded = "PullInSucceeded"

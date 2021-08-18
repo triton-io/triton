@@ -7,6 +7,20 @@ metadata:
   name: manager-role
 rules:
 - apiGroups:
+  - apps.kruise.io
+  resources:
+  - clonesets
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - apps.kruise.io
+  resources:
+  - clonesets/status
+  verbs:
+  - get
+- apiGroups:
   - apps.triton.io
   resources:
   - deployflows

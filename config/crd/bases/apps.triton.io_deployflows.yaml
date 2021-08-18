@@ -89,6 +89,8 @@ spec:
                     type: string
                   groupID:
                     type: integer
+                  instanceName:
+                    type: string
                   replicas:
                     description: Replicas defines the replicas num of app
                     format: int32
@@ -6540,6 +6542,7 @@ spec:
                 - appID
                 - appName
                 - groupID
+                - instanceName
                 - selector
                 - template
                 type: object

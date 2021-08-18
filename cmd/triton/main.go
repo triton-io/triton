@@ -22,9 +22,15 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
+	kubeclient "github.com/triton-io/triton/pkg/kube/client"
+	"github.com/triton-io/triton/pkg/log"
+	"github.com/triton-io/triton/pkg/routes"
+
 	kruiseappsv1alpha1 "github.com/openkruise/kruise-api/apps/v1alpha1"
 	tritonappsv1alpha1 "github.com/triton-io/triton/apis/apps/v1alpha1"
-	"github.com/triton-io/triton/pkg/kube/controllers"
+	"github.com/triton-io/triton/pkg/kube/controller"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
@@ -58,12 +64,13 @@ func init() {
 	//+kubebuilder:scaffold:builder
 }
 func main() {
-	var metricsAddr, pprofAddr string
+	var metricsAddr, restAddr, pprofAddr string
 	var healthProbeAddr string
 	var enableLeaderElection, enablePprof, allowPrivileged bool
 	var leaderElectionNamespace string
 	var namespace string
 	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
+	flag.StringVar(&restAddr, "rest-addr", ":8088", "The address the RESTAPI endpoint binds to.")
 	flag.StringVar(&healthProbeAddr, "health-probe-addr", ":8000", "The address the healthz/readyz endpoint binds to.")
 	flag.BoolVar(&allowPrivileged, "allow-privileged", true, "If true, allow privileged containers. It will only work if api-server is also"+
 		"started with --allow-privileged=true.")
@@ -74,6 +81,14 @@ func main() {
 		"Namespace if specified restricts the manager's cache to watch objects in the desired namespace. Defaults to all namespaces.")
 	flag.BoolVar(&enablePprof, "enable-pprof", false, "Enable pprof for controller manager.")
 	flag.StringVar(&pprofAddr, "pprof-addr", ":8090", "The address the pprof binds to.")
+	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
+	pflag.Parse()
+
+	if err := viper.BindPFlags(pflag.CommandLine); err != nil {
+		panic(err)
+	}
+
+	log.InitLog()
 
 	opts := zap.Options{
 		Development: true,
@@ -111,19 +126,7 @@ func main() {
 	setRestConfig(cfg)
 	cfg.UserAgent = "triton-manager"
 
-	mgr, err := ctrl.NewManager(cfg, ctrl.Options{
-		Scheme:                  scheme,
-		MetricsBindAddress:      metricsAddr,
-		HealthProbeBindAddress:  healthProbeAddr,
-		LeaderElection:          enableLeaderElection,
-		LeaderElectionID:        "triton-manager",
-		LeaderElectionNamespace: leaderElectionNamespace,
-		Namespace:               namespace,
-	})
-	if err != nil {
-		setupLog.Error(err, "unable to start manager")
-		os.Exit(1)
-	}
+	mgr := kubeclient.NewManager()
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
 		setupLog.Error(err, "unable to set up health check")
@@ -136,16 +139,25 @@ func main() {
 
 	go func() {
 		setupLog.Info("setup controllers")
-		if err = controllers.SetupWithManager(mgr); err != nil {
+		if err := controllers.SetupWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to setup controllers")
 			os.Exit(1)
 		}
 	}()
 
-	setupLog.Info("starting manager")
-	if err := mgr.Start(stopCh); err != nil {
-		setupLog.Error(err, "problem running manager")
-		os.Exit(1)
+	go func() {
+		setupLog.Info("starting manager")
+		if err := mgr.Start(stopCh); err != nil {
+			setupLog.Error(err, "problem running manager")
+			os.Exit(1)
+		}
+	}()
+
+	// 运行服务器
+	server := routes.NewServer().SetupRouters()
+	if err := server.Run(restAddr); err != nil {
+		log.Error("run server error:", err)
+		panic(err)
 	}
 }
 

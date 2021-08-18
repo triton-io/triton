@@ -57,9 +57,10 @@ const (
 
 // ApplicationSpec describes the new application state which will be created or updated by a Deploy
 type ApplicationSpec struct {
-	AppID   int    `json:"appID"`
-	GroupID int    `json:"groupID"`
-	AppName string `json:"appName"`
+	AppID        int    `json:"appID"`
+	GroupID      int    `json:"groupID"`
+	AppName      string `json:"appName"`
+	InstanceName string `json:"instanceName"`
 
 	// Selector is a label query over pods that should match the replica count.
 	// It must match the pod template's labels.
