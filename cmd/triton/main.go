@@ -30,7 +30,7 @@ import (
 
 	kruiseappsv1alpha1 "github.com/openkruise/kruise-api/apps/v1alpha1"
 	tritonappsv1alpha1 "github.com/triton-io/triton/apis/apps/v1alpha1"
-	"github.com/triton-io/triton/pkg/kube/controllers"
+	"github.com/triton-io/triton/pkg/kube/controller"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"

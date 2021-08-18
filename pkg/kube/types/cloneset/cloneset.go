@@ -1,6 +1,9 @@
 package cloneset
 
 import (
+	tritonappsv1alpha1 "github.com/triton-io/triton/apis/apps/v1alpha1"
+	"github.com/triton-io/triton/pkg/kube/fetcher"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"strings"
 
 	kruiseappsv1alpha1 "github.com/openkruise/kruise-api/apps/v1alpha1"
@@ -133,4 +136,13 @@ func (cs *CloneSet) ready() bool {
 func (cs *CloneSet) Managed() bool {
 	managedSelector := cs.GetManagedSelector()
 	return managedSelector.Matches(labels.Set(cs.GetLabels()))
+}
+
+func CloneSetStatusSynced(deploy *tritonappsv1alpha1.DeployFlow, cl client.Client) bool {
+	cs, found, err := fetcher.GetCloneSetInCacheOwnedByDeploy(deploy, cl)
+	if err != nil || !found {
+		return false
+	}
+
+	return cs.GetGeneration() == cs.Status.ObservedGeneration
 }

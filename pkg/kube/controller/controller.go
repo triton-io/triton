@@ -17,8 +17,8 @@ limitations under the License.
 package controllers
 
 import (
-	"github.com/triton-io/triton/pkg/kube/controllers/cloneset"
-	"github.com/triton-io/triton/pkg/kube/controllers/deployflow"
+	"github.com/triton-io/triton/pkg/kube/controller/cloneset"
+	"github.com/triton-io/triton/pkg/kube/controller/deployflow"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/klog"
 	"sigs.k8s.io/controller-runtime/pkg/manager"

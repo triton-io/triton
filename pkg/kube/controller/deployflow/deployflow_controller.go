@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	internalpod "github.com/triton-io/triton/pkg/kube/types/pod"
 	"reflect"
 	"strings"
 	"sync"
@@ -29,7 +30,6 @@ import (
 
 	"github.com/pkg/errors"
 	terrors "github.com/triton-io/triton/pkg/errors"
-	"github.com/triton-io/triton/pkg/kube/controllers/base"
 	"github.com/triton-io/triton/pkg/kube/fetcher"
 	internaldeploy "github.com/triton-io/triton/pkg/kube/types/deploy"
 	"github.com/triton-io/triton/pkg/services/deployflow"
@@ -789,7 +789,7 @@ func (r *DeployFlowReconciler) setPodReadinessGates(idl *internaldeploy.Deploy) 
 
 	for _, p := range idl.CurrentBatchPods() {
 		logger.Infof("Setting readiness gate for pod %s as True", p.Name)
-		err := base.SetPodReadinessGate(idl.Namespace, p.Name, r.Client)
+		err := internalpod.SetPodReadinessGate(idl.Namespace, p.Name, r.Client)
 		if err != nil {
 			logger.WithError(err).Errorf("Failed to update pod %s", p.Name)
 			return err
