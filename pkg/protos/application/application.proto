@@ -1,0 +1,92 @@
+syntax = "proto3";
+
+import "deployflow/deployflow.proto";
+
+option go_package = "github.com/triton-io/triton/pkg/protos/application";
+
+package application;
+
+// The application service definition.
+service Application {
+  rpc Get (InstanceMetaRequest) returns (InstanceReply) {}
+  rpc Gets (GetsRequest) returns (InstancesReply) {}
+  rpc Restart (RestartRequest) returns (RestartReply) {}
+  rpc Scale (ScaleRequest) returns (ScaleReply) {}
+  rpc Rollback (RollbackRequest) returns (RollbackReply) {}
+  rpc Delete (InstanceMetaRequest) returns (EmptyReply) {}
+}
+
+message InstanceMeta {
+  string namespace = 1;
+  string name = 2;
+}
+
+message Instance {
+  string namespace = 1;
+  string name = 2;
+  int32 availableReplicas = 3;
+  int32 replicas = 4;
+  string status = 5;
+  int32 appID = 6;
+  int32 groupID = 7;
+  string image = 8;
+  string cpu = 9;
+  string memory = 10;
+  string requestCPU = 11;
+  string requestMemory = 12;
+  string updateRevision = 13;
+}
+
+message InstanceFilter {
+  string namespace = 1;
+}
+
+message GetsRequest {
+  InstanceFilter filter = 1;
+}
+
+message RestartRequest {
+  InstanceMeta instance = 1;
+  deployflow.NonUpdateStrategy strategy = 2;
+}
+
+message ScaleRequest {
+  InstanceMeta instance = 1;
+  deployflow.NonUpdateStrategy strategy = 2;
+  int32 replicas = 3;
+}
+
+message RollbackRequest {
+  InstanceMeta instance = 1;
+  string deployName = 2;
+  deployflow.UpdateStrategy strategy = 3;
+}
+
+message InstanceMetaRequest {
+  InstanceMeta instance = 1;
+}
+
+message RestartReply {
+  string deployName = 1;
+}
+
+message ScaleReply {
+  string deployName = 1;
+}
+
+message RollbackReply {
+  string deployName = 1;
+  string rollbackTo = 2;
+}
+
+message InstanceReply {
+  Instance instance = 1;
+}
+
+message InstancesReply {
+  repeated Instance instances = 1;
+}
+
+message EmptyReply {
+  // Intentionally empty.
+}

@@ -1,6 +1,5 @@
 package deployflow
 
-
 const (
 	// event reasons
 	eventReasonDeployed  = "Deployed"

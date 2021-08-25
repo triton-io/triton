@@ -21,25 +21,29 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"runtime"
 
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	kubeclient "github.com/triton-io/triton/pkg/kube/client"
 	"github.com/triton-io/triton/pkg/log"
 	"github.com/triton-io/triton/pkg/routes"
+	"github.com/triton-io/triton/pkg/server/grpc"
 
 	kruiseappsv1alpha1 "github.com/openkruise/kruise-api/apps/v1alpha1"
 	tritonappsv1alpha1 "github.com/triton-io/triton/apis/apps/v1alpha1"
 	"github.com/triton-io/triton/pkg/kube/controller"
-	"k8s.io/apimachinery/pkg/runtime"
+	kruntime "k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"k8s.io/kubernetes/pkg/capabilities"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 
+	_ "go.uber.org/automaxprocs"
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
+	_ "net/http/pprof"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
@@ -47,7 +51,7 @@ import (
 )
 
 var (
-	scheme   = runtime.NewScheme()
+	scheme   = kruntime.NewScheme()
 	setupLog = ctrl.Log.WithName("setup")
 
 	restConfigQPS   = flag.Int("rest-config-qps", 30, "QPS of rest config.")
@@ -64,13 +68,14 @@ func init() {
 	//+kubebuilder:scaffold:builder
 }
 func main() {
-	var metricsAddr, restAddr, pprofAddr string
+	var metricsAddr, restAddr, grpcAddr, pprofAddr string
 	var healthProbeAddr string
 	var enableLeaderElection, enablePprof, allowPrivileged bool
 	var leaderElectionNamespace string
 	var namespace string
 	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&restAddr, "rest-addr", ":8088", "The address the RESTAPI endpoint binds to.")
+	flag.StringVar(&grpcAddr, "grpc-addr", ":8099", "The address the GRPCAPI endpoint binds to.")
 	flag.StringVar(&healthProbeAddr, "health-probe-addr", ":8000", "The address the healthz/readyz endpoint binds to.")
 	flag.BoolVar(&allowPrivileged, "allow-privileged", true, "If true, allow privileged containers. It will only work if api-server is also"+
 		"started with --allow-privileged=true.")
@@ -152,6 +157,10 @@ func main() {
 			os.Exit(1)
 		}
 	}()
+
+	// start grpc server
+	go grpc.Serve()
+	log.Infof("NumCPU: %d, GOMAXPROCS: %d\n", runtime.NumCPU(), runtime.GOMAXPROCS(-1))
 
 	// 运行服务器
 	server := routes.NewServer().SetupRouters()

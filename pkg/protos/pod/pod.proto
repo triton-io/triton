@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/triton-io/triton/pkg/protos/pod";
+
+package pod;
+
+// The pod service definition.
+service Pod {
+  rpc Get (PodMetaRequest) returns (PodReply) {}
+  rpc Gets (GetsRequest) returns (PodsReply) {}
+}
+
+message PodMeta {
+  string namespace = 1;
+  string name = 2;
+}
+
+message PodFilter {
+  string namespace = 1;
+  string instanceName = 2;
+  string  ip = 3;
+}
+
+message PodInfo {
+  string namespace = 1;
+  string name = 2;
+  string instanceName = 3;
+  string image = 4;
+  string cpu = 5;
+  string memory = 6;
+  string guaranteedCPU = 7;
+  string guaranteedMemory = 8;
+  bool publicNetwork = 9;
+  string containerName = 10;
+  string podIP = 11;
+  string status = 12;
+  string hostIP = 13;
+  string updateRevision = 14;
+
+  google.protobuf.Timestamp creationTimestamp = 15;
+}
+
+message PodMetaRequest {
+  PodMeta pod = 1;
+}
+
+message GetsRequest {
+  PodFilter filter = 1;
+  bool noSort = 2;
+}
+
+message PodReply {
+  PodInfo pod = 1;
+}
+
+message PodsReply {
+  repeated PodInfo pods = 1;
+}

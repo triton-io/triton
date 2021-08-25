@@ -21,7 +21,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	internalpod "github.com/triton-io/triton/pkg/kube/types/pod"
 	"reflect"
 	"strings"
 	"sync"
@@ -32,6 +31,8 @@ import (
 	terrors "github.com/triton-io/triton/pkg/errors"
 	"github.com/triton-io/triton/pkg/kube/fetcher"
 	internaldeploy "github.com/triton-io/triton/pkg/kube/types/deploy"
+	internalpod "github.com/triton-io/triton/pkg/kube/types/pod"
+	"github.com/triton-io/triton/pkg/kube/types/workload"
 	"github.com/triton-io/triton/pkg/services/deployflow"
 	"github.com/triton-io/triton/pkg/setting"
 	corev1 "k8s.io/api/core/v1"
@@ -716,15 +717,93 @@ func (r *DeployFlowReconciler) processBakingBatch(idl *internaldeploy.Deploy) er
 	logger.Info("Baking is done, remove old pods if any and mark current batch as baked")
 
 	// pull out old pods
-	//if err := r.pullOut(idl); err != nil {
-	//	logger.WithError(err).Error("failed to pull out old pods")
-	//	return err
-	//}
+	if err := r.pullOut(idl); err != nil {
+		logger.WithError(err).Error("failed to pull out old pods")
+		return err
+	}
 
 	logger.Infof("Batch %d is finished", idl.CurrentBatchNumber())
 	idl.MarkCurrentBatchAsFinished()
 
 	return nil
+}
+
+func (r *DeployFlowReconciler) pullOut(idl *internaldeploy.Deploy) error {
+	logger := log.WithField("deploy", idl.Name)
+
+	if idl.Spec.Action == setting.Create {
+		return nil
+	}
+
+	if idl.Spec.Action == setting.Restart || (idl.Spec.Action == setting.ScaleIn && len(idl.NonUpdateStrategy().PodsToDelete) > 0) {
+		if err := r.pullOutPodsForRestart(idl); err != nil {
+			logger.WithError(err).Error("Failed to pull out pods for restart")
+			return err
+		}
+	}
+
+	logger.Info("Start to pull out old pods.")
+
+	return r.processCloneSet(idl)
+}
+func (r *DeployFlowReconciler) pullOutPodsForRestart(idl *internaldeploy.Deploy) error {
+	logger := log.WithField("deploy", idl.Name)
+
+	ptd, err := r.getPodsForDeletion(idl)
+	if err != nil {
+		return err
+	}
+
+	batchSize := idl.CurrentBatchSize()
+	var p string
+	for i := 0; i < batchSize; i++ {
+		if len(ptd) == 0 {
+			break
+		}
+		p, ptd = ptd[0], ptd[1:]
+		logger.Infof("Deleting pod %s", p)
+		if err := DeletePod(idl.Namespace, p, r.Client); err != nil {
+			logger.WithError(err).Errorf("Failed to delete pod %s", p)
+		}
+	}
+
+	return nil
+}
+
+func (r *DeployFlowReconciler) getPodsForDeletion(idl *internaldeploy.Deploy) ([]string, error) {
+	s := workload.GetDefaultSelector(idl.Spec.Application.AppID, idl.Spec.Application.GroupID)
+	pods := &corev1.PodList{}
+	if err := r.List(context.TODO(), pods, client.InNamespace(idl.Namespace), client.MatchingLabelsSelector{Selector: s.AsSelector()}); err != nil {
+		return nil, errors.Wrap(err, "failed to fetch pods")
+	}
+
+	newPods := sets.NewString(idl.Status.Pods...)
+	ptd := sets.NewString(idl.NonUpdateStrategy().PodsToDelete...)
+
+	readyPods := make([]string, 0, len(pods.Items))
+	notReadyPods := make([]string, 0, len(pods.Items))
+	for _, p := range pods.Items {
+		if !p.DeletionTimestamp.IsZero() {
+			continue
+		}
+
+		if ptd.Len() > 0 {
+			if !ptd.Has(p.Name) {
+				continue
+			}
+		} else if newPods.Has(p.Name) {
+			continue
+		}
+
+		ip := internalpod.FromPod(&p)
+		if ip.Ready() {
+			readyPods = append(readyPods, ip.Name)
+		} else {
+			notReadyPods = append(notReadyPods, p.Name)
+		}
+	}
+
+	return append(notReadyPods, readyPods...), nil
 }
 
 func (r *DeployFlowReconciler) checkBakingGate(idl *internaldeploy.Deploy) error {
@@ -896,4 +975,15 @@ func (r *DeployFlowReconciler) DeleteCloneSetWhenActionIsScaleInZero(dl *tritona
 		}
 	}
 	return nil
+}
+
+func DeletePod(ns, name string, cl client.Client) error {
+	err := cl.Delete(context.TODO(), &corev1.Pod{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: ns,
+			Name:      name,
+		},
+	})
+
+	return client.IgnoreNotFound(err)
 }
