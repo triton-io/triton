@@ -27,6 +27,10 @@ spec:
       jsonPath: .status.updatedReadyReplicas
       name: UPDATED_READY_REPLICAS
       type: integer
+    - description: Total replicas in all finished batches
+      jsonPath: .status.finishedReplicas
+      name: FINISHED_REPLICAS
+      type: integer
     - description: Phase of this Deploy
       jsonPath: .status.phase
       name: PHASE
@@ -35,18 +39,28 @@ spec:
       jsonPath: .status.batches
       name: BATCHES
       type: integer
-    - description: Finished batches
-      jsonPath: .status.finishedBatches
-      name: FINISHED_BATCHES
-      type: integer
-    - description: Total replicas in all finished batches
-      jsonPath: .status.finishedReplicas
-      name: FINISHED_REPLICAS
-      type: integer
     - description: Size of current batch
       jsonPath: .status.conditions[-1].batchSize
       name: CURRENT_BATCH_SIZE
       type: integer
+    - description: CreationTimestamp is a timestamp representing the server time when
+        this object was created. It is not guaranteed to be set in happens-before
+        order across separate operations. Clients may not set this value. It is represented
+        in RFC3339 form and is in UTC.
+      jsonPath: .metadata.creationTimestamp
+      name: AGE
+      type: date
+    - description: The last update time of deployflow. It is represented in RFC3339
+        form and is in UTC.
+      jsonPath: .status.updatedAt
+      name: UPDATE_AT
+      priority: 1
+      type: date
+    - description: The pods deployed by this deployflow.
+      jsonPath: .status.pods
+      name: PODS
+      priority: 1
+      type: string
     name: v1alpha1
     schema:
       openAPIV3Schema:
