@@ -16,18 +16,21 @@ RUN go mod download
 
 # Copy the go source
 COPY cmd cmd/
-COPY api api/
+COPY apis apis/
 COPY pkg pkg/
 COPY version version/
 
 # Build
 RUN CGO_ENABLED=0 go build -ldflags "-extldflags '-static' -X 'triton/version.Version=${VERSION}' -X 'triton/version.BuildNumber=${BUILD_NUMBER}' -X 'triton/version.GitCommit=${GIT_COMMIT}'" -o triton cmd/triton/main.go
 
-# Use distroless as minimal base image to package the manager binary
-# Refer to https://github.com/GoogleContainerTools/distroless for more details
-FROM gcr.io/distroless/static:nonroot
+# Use Ubuntu 20.04 LTS as base image to package the manager binary
+FROM ubuntu:focal
+# This is required by daemon connnecting with cri
+RUN ln -s /usr/bin/* /usr/sbin/ && apt-get update -y \
+  && apt-get install --no-install-recommends -y ca-certificates \
+  && apt-get clean && rm -rf /var/log/*log /var/lib/apt/lists/* /var/log/apt/* /var/lib/dpkg/*-old /var/cache/debconf/*-old
+
 WORKDIR /app
 COPY --from=builder /triton/triton .
-USER 65532:65532
 
 ENTRYPOINT ["/app/triton"]
