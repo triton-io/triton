@@ -19,6 +19,7 @@ package deployflow
 import (
 	kruiseappsv1alpha1 "github.com/openkruise/kruise-api/apps/v1alpha1"
 	internaldeploy "github.com/triton-io/triton/pkg/kube/types/deploy"
+	"github.com/triton-io/triton/pkg/setting"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -29,6 +30,7 @@ func generate(idl *internaldeploy.Deploy) *kruiseappsv1alpha1.CloneSet {
 	template := idl.Spec.Application.Template
 	template.Labels = idl.GetCloneSetLabels()
 	template.Spec.ImagePullSecrets = getImagePullSecrets()
+	template.Spec.ReadinessGates = getReadinessGates()
 
 	return &kruiseappsv1alpha1.CloneSet{
 		ObjectMeta: metav1.ObjectMeta{
@@ -60,5 +62,13 @@ func getImagePullSecrets() []corev1.LocalObjectReference {
 	return []corev1.LocalObjectReference{
 		{Name: "proharborregcred"},
 		{Name: "uatharborregcred"},
+	}
+}
+
+func getReadinessGates() []corev1.PodReadinessGate {
+	return []corev1.PodReadinessGate{
+		{
+			ConditionType: setting.PodReadinessGate,
+		},
 	}
 }

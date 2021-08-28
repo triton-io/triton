@@ -248,11 +248,13 @@ type PodInfo struct {
 // +kubebuilder:resource:scope=Namespaced,shortName=df
 // +kubebuilder:printcolumn:name="REPLICAS",type="integer",JSONPath=".status.replicas",description="Replicas of this Deploy"
 // +kubebuilder:printcolumn:name="UPDATED_READY_REPLICAS",type="integer",JSONPath=".status.updatedReadyReplicas",description="Updated and ready replicas"
+// +kubebuilder:printcolumn:name="FINISHED_REPLICAS",type="integer",JSONPath=".status.finishedReplicas",description="Total replicas in all finished batches"
 // +kubebuilder:printcolumn:name="PHASE",type="string",JSONPath=".status.phase",description="Phase of this Deploy"
 // +kubebuilder:printcolumn:name="BATCHES",type="integer",JSONPath=".status.batches",description="Total batches of this Deploy"
-// +kubebuilder:printcolumn:name="FINISHED_BATCHES",type="integer",JSONPath=".status.finishedBatches",description="Finished batches"
-// +kubebuilder:printcolumn:name="FINISHED_REPLICAS",type="integer",JSONPath=".status.finishedReplicas",description="Total replicas in all finished batches"
 // +kubebuilder:printcolumn:name="CURRENT_BATCH_SIZE",type="integer",JSONPath=".status.conditions[-1].batchSize",description="Size of current batch"
+// +kubebuilder:printcolumn:name="AGE",type="date",JSONPath=".metadata.creationTimestamp",description="CreationTimestamp is a timestamp representing the server time when this object was created. It is not guaranteed to be set in happens-before order across separate operations. Clients may not set this value. It is represented in RFC3339 form and is in UTC."
+// +kubebuilder:printcolumn:name="UPDATE_AT",type="date",priority = 1,JSONPath=".status.updatedAt",description="The last update time of deployflow. It is represented in RFC3339 form and is in UTC."
+// +kubebuilder:printcolumn:name="PODS",type="string",priority = 1,JSONPath=".status.pods",description="The pods deployed by this deployflow."
 
 // DeployFlow is the Schema for the deployflows API
 type DeployFlow struct {

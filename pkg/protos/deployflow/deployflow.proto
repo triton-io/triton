@@ -1,0 +1,199 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+
+option go_package = "github.com/triton-io/triton/pkg/protos/deployflow";
+
+package deployflow;
+
+// The deploy flow service definition.
+service DeployFlow {
+  rpc Get (DeployMetaRequest) returns (DeployReply) {}
+  rpc Gets (DeploysRequest) returns (DeploysReply) {}
+  rpc Cancel (DeployMetaRequest) returns (stream DeployReply) {}
+  rpc Pause (DeployMetaRequest) returns (stream DeployReply) {}
+  rpc Resume (DeployMetaRequest) returns (stream DeployReply) {}
+  rpc Continue (ContinueRequest) returns (DeployReply) {}
+  rpc Next (NextRequest) returns (DeployReply) {}
+  rpc Delete (DeployMetaRequest) returns (EmptyReply) {}
+
+  // Watch watches Deploy status changes continuously till the target state is met.
+  // If target state is not specified, use current desired target state in DeployFlow spec.
+  // Watch will be stopped when the deploy is gone or finished or an error happens.
+  rpc Watch (WatchRequest) returns (stream DeployReply) {}
+
+  // ListAndWatch lists Deploys first, and then watch Deploy changes infinitely.
+  rpc ListAndWatch (DeploysRequest) returns (stream DeploysReply) {}
+}
+
+message DeployMeta {
+  string namespace = 1;
+  string name = 2;
+}
+
+message DeployFilter {
+  string namespace = 1;
+  string instanceName = 2;
+  string action = 3;
+  int32  start = 4;
+  int32  pageSize = 5;
+  google.protobuf.Timestamp after = 6;
+}
+
+message TargetState {
+  string stage = 1;
+  int32 batches = 2;
+}
+
+message PodInfo {
+  string name = 1;
+  string ip = 2;
+  int32  port = 3;
+  string phase = 4;
+  string pullInStatus = 5;
+}
+
+message Batch {
+  int32 batch = 1;
+  int32 batchSize = 2;
+  bool canary = 3;
+  string phase = 4;
+  int32 failedReplicas = 5;
+  repeated PodInfo pods = 6;
+  google.protobuf.Timestamp startedAt = 7;
+  google.protobuf.Timestamp finishedAt = 8;
+}
+
+message Deploy {
+  string namespace = 1;
+  string name = 2;
+  int32 appID = 3;
+  int32 groupID = 4;
+  string appName = 5;
+  string instanceName = 6;
+  int32 replicas = 7;
+  string action = 8;
+
+  int32 availableReplicas = 9;
+  int32 updatedReplicas = 10;
+  int32 updatedReadyReplicas = 11;
+  string updateRevision = 12;
+  repeated Batch conditions = 13;
+  bool paused = 14;
+  string phase = 15;
+  bool finished = 16;
+  int32 batches = 17;
+  int32 batchSize = 18;
+  int32 finishedBatches = 19;
+  int32 finishedReplicas = 20;
+  int32 failedReplicas = 21;
+
+  google.protobuf.Timestamp startedAt = 22;
+  google.protobuf.Timestamp finishedAt = 23;
+  google.protobuf.Timestamp updatedAt = 29;
+
+  string mode = 24;
+  int32 batchIntervalSeconds = 25;
+  int32 timeoutSeconds = 26;
+  int32 gracefulPeriodSeconds = 27;
+  int32 canary = 28;
+}
+
+message UpdateStrategy {
+  int32 canary = 1;
+  string batchSize = 2;
+  bool noPullIn = 3;
+  string stage = 4;
+  int32 batches = 5;
+  int32 batchIntervalSeconds = 6;
+  string mode = 7;
+}
+
+message NonUpdateStrategy {
+  string batchSize = 1;
+  repeated string podsToDelete = 2;
+  int32 batches = 3;
+  int32 batchIntervalSeconds = 4;
+  string mode = 5;
+}
+
+message SidecarSpec {
+  string name = 1;
+  string image = 2;
+  repeated EnvVar envs = 3;
+  string cpu = 4;
+  string memory = 5;
+  string guaranteedCPU = 6;
+  string guaranteedMemory = 7;
+  repeated ContainerPort containerPorts = 8;
+}
+
+message ApplicationSpec {
+  int32 appID = 1;
+  int32 groupID = 2;
+  string appName = 3;
+  string instanceName = 4;
+
+  google.protobuf.Int32Value replicas = 5;
+
+  string applicationType = 6;
+  map<string, string> applicationLabel = 7;
+
+}
+
+message EnvVar {
+  string name = 1;
+  string value = 2;
+}
+
+message ContainerPort {
+  int32 hostPort = 1;
+  int32 containerPort = 2;
+  string protocol = 3;
+  string name = 4;
+}
+
+message DeployMetaRequest {
+  DeployMeta deploy = 1;
+}
+
+message DeploysRequest {
+  DeployFilter filter = 1;
+}
+
+message ContinueRequest {
+  DeployMeta deploy = 1;
+  TargetState target = 2;
+}
+
+message NextRequest {
+  DeployMeta deploy = 1;
+}
+
+message WatchRequest {
+  DeployMeta deploy = 1;
+  TargetState target = 2;
+}
+
+message CreateRequest {
+  int32 appID = 1;
+  int32 groupID = 2;
+  string appName = 3;
+  string instanceName = 4;
+  string namespace = 5;
+  ApplicationSpec applicationSpec = 6;
+  UpdateStrategy strategy = 7;
+}
+
+message DeployReply {
+  Deploy deploy = 1;
+}
+
+message DeploysReply {
+  repeated Deploy deploys = 1;
+}
+
+message EmptyReply {
+  // Intentionally empty.
+}
