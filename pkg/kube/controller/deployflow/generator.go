@@ -60,8 +60,7 @@ func getDefaultStrategy() kruiseappsv1alpha1.CloneSetUpdateStrategy {
 
 func getImagePullSecrets() []corev1.LocalObjectReference {
 	return []corev1.LocalObjectReference{
-		{Name: "proharborregcred"},
-		{Name: "uatharborregcred"},
+		{Name: setting.HarborCred},
 	}
 }
 

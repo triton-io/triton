@@ -13,4 +13,5 @@ const (
 	GroupIDLabel     = "group"
 	ManageLabel      = "managed-by"
 	TritonKey        = "triton-io"
+	HarborCred       = "proharborregcred"
 )
