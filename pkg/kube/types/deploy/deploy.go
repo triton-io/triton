@@ -126,7 +126,7 @@ func (d *Deploy) RevisionChanged() bool {
 }
 
 func (d *Deploy) NoChangedDeploy() bool {
-	return d.Status.ReplicasToProcess == 0
+	return d.Status.ReplicasToProcess == 0 || d.Status.AvailableReplicas != 0
 }
 
 func (d *Deploy) GetNotContainerReadyPods() []string {
