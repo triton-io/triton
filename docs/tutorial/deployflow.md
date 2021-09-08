@@ -220,6 +220,9 @@ Commercial support is available at
 </html>
 ```
 
+## Complete DeployFlow status transfer demonstration
+![deployflow-status](../img/deployflow-status.jpg)
+
 ## Pause/Continue the DeployFlow
 During the deploy process, if you want to pause the DeployFlow, use:
 ```bash

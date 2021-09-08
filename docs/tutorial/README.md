@@ -2,7 +2,7 @@
 
 These tutorials walk through several examples to demonstrate how to use the Triton Workloads to deploy and manage applications
 
-[Install triton](../../README.md)
+[Install triton](../installation/README.md)
 
 ## Try tutorials
 

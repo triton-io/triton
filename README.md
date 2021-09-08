@@ -14,6 +14,8 @@ English | [简体中文](./README-zh_CN.md)
 
 Triton provides a cloud-native DeployFlow, which is safe, controllable, and policy-rich.
 
+For more introduction details, see [Overview docs](./docs/README.md)
+
 ## Key Features
 
 - **Canary Deploy**
@@ -50,7 +52,8 @@ For more details, see [installation doc](./docs/installation/README.md).
 ## Documentation
 
 We provide [**tutorials**](./docs/tutorial/README.md) for Triton controllers to demonstrate how to use them.
-We also provide [**debug guide**](./docs/debug/README.md) for Triton developers to help to how to debug. 
+
+We also provide [**debug guide**](./docs/debug/README.md) for Triton developers to help to debug. 
 
 ## Users
 
