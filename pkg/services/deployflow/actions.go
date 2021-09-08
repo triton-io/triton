@@ -89,13 +89,19 @@ func CreateNonUpdateDeploy(r *DeployNonUpdateRequest, cl client.Client, logger *
 		replicas = *cs.Spec.Replicas
 	}
 	ics := internalcloneset.FromCloneSet(cs)
+
+	applicationSpec := tritonappsv1alpha1.ApplicationSpec{
+		AppID:        ics.GetAppID(),
+		GroupID:      ics.GetGroupID(),
+		Replicas:     &replicas,
+		AppName:      ics.GetAppName(),
+		Template:     ics.Spec.Template,
+		InstanceName: r.InstanceName,
+	}
+
 	g := generator{
-		appID:             ics.GetAppID(),
-		groupID:           ics.GetGroupID(),
-		replicas:          replicas,
+		applicationSpec:   &applicationSpec,
 		namespace:         r.Namespace,
-		appName:           ics.GetAppName(),
-		instanceName:      r.InstanceName,
 		action:            action,
 		nonUpdateStrategy: r.NonUpdateStrategy,
 	}

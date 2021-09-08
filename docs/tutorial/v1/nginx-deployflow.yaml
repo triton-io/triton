@@ -1,0 +1,40 @@
+apiVersion: apps.triton.io/v1alpha1
+kind: DeployFlow
+metadata:
+  labels:
+    app: "12122"
+    app.kubernetes.io/instance: 12122-sample-10010
+    app.kubernetes.io/name: deploy-demo-hello
+    group: "10010"
+    managed-by: triton-io
+  name: 12122-sample-10010-df
+  namespace: default
+spec:
+  action: create
+  application:
+    appID: 12122
+    appName: deploy-demo-hello
+    groupID: 10010
+    instanceName: 12122-sample-10010
+    replicas: 3
+    selector:
+      matchLabels:
+        app: "12122"
+        app.kubernetes.io/instance: 12122-sample-10010
+        app.kubernetes.io/name: deploy-demo-hello
+        group: "10010"
+        managed-by: triton-io
+    template:
+      metadata: {}
+      spec:
+        containers:
+          - image: nginx:latest
+            name: 12122-sample-10010-container
+            ports:
+              - containerPort: 80
+                protocol: TCP
+            resources: {}
+  updateStrategy:
+    batchSize: 1
+    canary: 1 # the number of canary batch
+    mode: auto # the mode is auto after canary batch
