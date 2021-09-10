@@ -30,7 +30,7 @@ For more introduction details, see [Overview docs](./docs/README.md)
 
    Triton provides many APIs to make deploy easy, such as `Next`, `Cancel`,`Pause`,`Resume`,`Scale`, `Gets`,`Restart` etc. 
 
-- ** Selective pods to scale/restart **
+- **Selective pods to scale/restart**
 
   User can scale selective pods or restart these pods.
 
