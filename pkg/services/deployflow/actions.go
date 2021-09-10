@@ -21,10 +21,8 @@ import (
 )
 
 type DeployNonUpdateRequest struct {
-	Replicas          int32
-	Namespace         string
-	InstanceName      string
 	Action            string
+	ApplicationSpec   *tritonappsv1alpha1.ApplicationSpec `json:"applicationSpec"`
 	NonUpdateStrategy *tritonappsv1alpha1.DeployNonUpdateStrategy
 }
 
@@ -60,11 +58,11 @@ func PatchDeployStatus(ns, name string, reader client.Reader, cl client.Client, 
 	return patch(ns, name, strategyBytes, reader, cl)
 }
 
-func CreateNonUpdateDeploy(r *DeployNonUpdateRequest, cl client.Client, logger *logrus.Entry) (*tritonappsv1alpha1.DeployFlow, error) {
+func CreateNonUpdateDeploy(r *DeployNonUpdateRequest, ns string, cl client.Client, logger *logrus.Entry) (*tritonappsv1alpha1.DeployFlow, error) {
 	action := r.Action
 	logger.Infof("Start to %s application", action)
 
-	cs, found, err := fetcher.GetCloneSetInCache(r.Namespace, r.InstanceName, cl)
+	cs, found, err := fetcher.GetCloneSetInCache(ns, r.ApplicationSpec.InstanceName, cl)
 	if err != nil {
 		logger.WithError(err).Error("failed to fetch cloneSet")
 		return nil, err
@@ -78,7 +76,10 @@ func CreateNonUpdateDeploy(r *DeployNonUpdateRequest, cl client.Client, logger *
 	}
 
 	// it is a scale action if replicas > 0
-	replicas := r.Replicas
+	var replicas int32
+	if r.ApplicationSpec != nil && r.ApplicationSpec.Replicas != nil {
+		replicas = *r.ApplicationSpec.Replicas
+	}
 	if replicas >= 0 && action == setting.Scale {
 		if replicas >= *cs.Spec.Replicas {
 			action = setting.ScaleOut
@@ -96,13 +97,25 @@ func CreateNonUpdateDeploy(r *DeployNonUpdateRequest, cl client.Client, logger *
 		Replicas:     &replicas,
 		AppName:      ics.GetAppName(),
 		Template:     ics.Spec.Template,
-		InstanceName: r.InstanceName,
+		InstanceName: ics.Name,
 	}
 
+	//g := generator{
+	//	applicationSpec:   &applicationSpec,
+	//	namespace:         r.Namespace,
+	//	action:            action,
+	//	nonUpdateStrategy: r.NonUpdateStrategy,
+	//}
+	//deploy := g.generate()
 	g := generator{
-		applicationSpec:   &applicationSpec,
-		namespace:         r.Namespace,
+		appID:             applicationSpec.AppID,
+		groupID:           applicationSpec.GroupID,
+		replicas:          replicas,
+		namespace:         ns,
+		appName:           r.ApplicationSpec.AppName,
+		instanceName:      r.ApplicationSpec.InstanceName,
 		action:            action,
+		applicationSpec:   r.ApplicationSpec,
 		nonUpdateStrategy: r.NonUpdateStrategy,
 	}
 	deploy := g.generate()
