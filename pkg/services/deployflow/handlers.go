@@ -1,6 +1,7 @@
 package deployflow
 
 import (
+	internalcloneset "github.com/triton-io/triton/pkg/kube/types/cloneset"
 	"io"
 
 	terrors "github.com/triton-io/triton/pkg/errors"
@@ -266,18 +267,37 @@ func createNonUpdateDeploy(ns, instanceName, action string, strategy *tritonapps
 		"namespace":    ns,
 		"instanceName": instanceName,
 	})
-
-	req := &DeployNonUpdateRequest{
-		Replicas:          replicas,
-		Namespace:         ns,
-		InstanceName:      instanceName,
-		Action:            action,
-		NonUpdateStrategy: strategy,
-	}
 	mgr := kubeclient.NewManager()
 	cl := mgr.GetClient()
 
-	updated, err := CreateNonUpdateDeploy(req, cl, dLogger)
+	cs, found, err := fetcher.GetCloneSetInCache(ns, instanceName, cl)
+	if err != nil {
+		log.WithError(err).Error("failed to fetch cloneSet")
+		response.ServerErrorWithMessage(err.Error(), c)
+		return
+	} else if !found {
+		log.Errorf("cloneSet not found")
+		return
+	}
+
+	ics := internalcloneset.FromCloneSet(cs)
+
+	applicationSpec := tritonappsv1alpha1.ApplicationSpec{
+		AppID:        ics.GetAppID(),
+		GroupID:      ics.GetGroupID(),
+		Replicas:     ics.Spec.Replicas,
+		AppName:      ics.GetAppName(),
+		Template:     ics.Spec.Template,
+		InstanceName: ics.Name,
+	}
+
+	req := &DeployNonUpdateRequest{
+		Action:            action,
+		ApplicationSpec:   &applicationSpec,
+		NonUpdateStrategy: strategy,
+	}
+
+	updated, err := CreateNonUpdateDeploy(req, ns, cl, dLogger)
 	if err != nil {
 		if terrors.IsNotFound(err) {
 			response.NotFound(c)

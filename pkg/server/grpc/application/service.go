@@ -75,6 +75,16 @@ func (s *Service) Restart(_ context.Context, in *pb.RestartRequest) (*pb.Restart
 	mgr := kubeclient.NewManager()
 	cl := mgr.GetClient()
 
+	cs, found, err := fetcher.GetCloneSetInCache(in.Instance.Namespace, in.Instance.Name, cl)
+	if err != nil {
+		logger.WithError(err).Error("failed to fetch cloneSet")
+		return nil, err
+	} else if !found {
+		return nil, terrors.NewNotFound("cloneSet not found")
+	}
+
+	ics := internalcloneset.FromCloneSet(cs)
+
 	size := intstr.Parse(in.Strategy.BatchSize)
 	strategy := &tritonappsv1alpha1.DeployNonUpdateStrategy{
 		BaseStrategy: tritonappsv1alpha1.BaseStrategy{
@@ -86,13 +96,21 @@ func (s *Service) Restart(_ context.Context, in *pb.RestartRequest) (*pb.Restart
 		PodsToDelete: in.Strategy.PodsToDelete,
 	}
 
+	applicationSpec := tritonappsv1alpha1.ApplicationSpec{
+		AppID:        ics.GetAppID(),
+		GroupID:      ics.GetGroupID(),
+		Replicas:     ics.Spec.Replicas,
+		AppName:      ics.GetAppName(),
+		Template:     ics.Spec.Template,
+		InstanceName: ics.Name,
+	}
+
 	req := &deployflow.DeployNonUpdateRequest{
-		Namespace:         in.Instance.Namespace,
-		InstanceName:      in.Instance.Name,
 		Action:            setting.Restart,
+		ApplicationSpec:   &applicationSpec,
 		NonUpdateStrategy: strategy,
 	}
-	updated, err := deployflow.CreateNonUpdateDeploy(req, cl, logger)
+	updated, err := deployflow.CreateNonUpdateDeploy(req, ics.Namespace, cl, logger)
 	if err != nil {
 		if terrors.IsNotFound(err) {
 			return nil, status.Error(codes.NotFound, "application not found")
@@ -113,6 +131,15 @@ func (s *Service) Scale(_ context.Context, in *pb.ScaleRequest) (*pb.ScaleReply,
 	})
 	mgr := kubeclient.NewManager()
 	cl := mgr.GetClient()
+	cs, found, err := fetcher.GetCloneSetInCache(in.Instance.Namespace, in.Instance.Name, cl)
+	if err != nil {
+		logger.WithError(err).Error("failed to fetch cloneSet")
+		return nil, err
+	} else if !found {
+		return nil, terrors.NewNotFound("cloneSet not found")
+	}
+
+	ics := internalcloneset.FromCloneSet(cs)
 
 	size := intstr.Parse(in.Strategy.BatchSize)
 	strategy := &tritonappsv1alpha1.DeployNonUpdateStrategy{
@@ -124,15 +151,21 @@ func (s *Service) Scale(_ context.Context, in *pb.ScaleRequest) (*pb.ScaleReply,
 		},
 		PodsToDelete: in.Strategy.PodsToDelete,
 	}
+	applicationSpec := tritonappsv1alpha1.ApplicationSpec{
+		AppID:        ics.GetAppID(),
+		GroupID:      ics.GetGroupID(),
+		Replicas:     &in.Replicas,
+		AppName:      ics.GetAppName(),
+		Template:     ics.Spec.Template,
+		InstanceName: ics.Name,
+	}
 
 	req := &deployflow.DeployNonUpdateRequest{
-		Replicas:          in.Replicas,
-		Namespace:         in.Instance.Namespace,
-		InstanceName:      in.Instance.Name,
 		Action:            setting.Scale,
+		ApplicationSpec:   &applicationSpec,
 		NonUpdateStrategy: strategy,
 	}
-	updated, err := deployflow.CreateNonUpdateDeploy(req, cl, logger)
+	updated, err := deployflow.CreateNonUpdateDeploy(req, in.Instance.Namespace, cl, logger)
 	if err != nil {
 		if terrors.IsNotFound(err) {
 			return nil, status.Error(codes.NotFound, "application not found")

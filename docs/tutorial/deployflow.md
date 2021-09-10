@@ -10,7 +10,7 @@ This tutorial walks you through an example to deploy a Nginx application using D
 4. make sure the `Triton controller` running.
 5. make sure you have install [grpcurl](https://github.com/fullstorydev/grpcurl)
 
-## Installing the Nginx DeployFlow
+## Create the Nginx DeployFlow
 
 There are two ways to create a DeployFlow:
 1. just using `kubectl apply -f `
@@ -252,7 +252,39 @@ You can also divide several batches to scale your cloneset using `auto` or `mann
 When a CloneSet is scaled down, sometimes user has preference to deleting specific Pods, you can use `podsToDelete` field.
 
 ```bash
-
-grpcurl --plaintext -d '{"instance":{"name":"12122-sample-10010","namespace":"default"},"replicas":2,"strategy":{"mode":"auto","batchSize":"10","podsToDelete":["12122-sample-10010-q749z"],"batches":"1","batchIntervalSeconds":10}}' \
+ grpcurl --plaintext -d '{"instance":{"name":"12122-sample-10010","namespace":"default"},"replicas":2,"strategy":{"batchSize":"1","batches":"1","batchIntervalSeconds":10}}' \
 localhost:8099 application.Application/Scale
+{
+  "deployName": "12122-sample-10010-dzkc4"
+}
+❯ kubectl get clone
+NAME                  DESIRED   UPDATED   UPDATED_READY   READY   TOTAL   AGE
+12122-sample-10010    2         2         2               2       2       43h
 ```
+
+We can see the cloneset `12122-sample-10010` has been scaled to 2 replicas.
+
+### Scale selective pods
+Thanks to OpenKruise, Triton supports Selective Pods Scale:
+
+```bash
+❯ kubectl get pod | grep 12122-sample
+12122-sample-10010-jrk6g                      1/1     Running             0          23s
+12122-sample-10010-qk2bs                      1/1     Running             0          40h
+12122-sample-10010-qllmx                      1/1     Running             0          43h
+```
+
+Now we have 3 pods in cloneset, then we select `12122-sample-10010-jrk6g ` to scale.
+
+```bash
+❯ grpcurl --plaintext -d '{"instance":{"name":"12122-sample-10010","namespace":"default"},"replicas":2,"strategy":{"podsToDelete":["12122-sample-10010-jrk6g"],"batchSize":"1","batches":"1","batchIntervalSeconds":10}}' \
+localhost:8099 application.Application/Scale
+{
+  "deployName": "12122-sample-10010-65ns4"
+}
+❯ kubectl get pod | grep 12122-sample
+12122-sample-10010-qk2bs                      1/1     Running             0          40h
+12122-sample-10010-qllmx                      1/1     Running             0          43h
+```
+
+The cloneset has been scaled to 2 replicas and the deleted pod is `12122-sample-10010-jrk6g`.
