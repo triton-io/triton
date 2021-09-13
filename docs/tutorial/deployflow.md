@@ -13,7 +13,7 @@ This tutorial walks you through an example to deploy a Nginx application using D
 ## Create the Nginx DeployFlow
 
 There are two ways to create a DeployFlow:
-1. just using `kubectl apply -f `
+1. just using `kubectl apply -f https://github.com/triton-io/triton/raw/main/docs/tutorial/v1/nginx-deployflow.yaml`
 2. also, triton provides REST & GRPC API to handle deploy process, using the next API to create a DeployFlow
 ```bash
 curl --location --request POST 'localhost:8088/api/v1/namespaces/default/deployflows' \
@@ -58,7 +58,7 @@ curl --location --request POST 'localhost:8088/api/v1/namespaces/default/deployf
 
 Then we create the service of this application:
 ```bash
-kubectl apply -f 
+kubectl apply -f https://raw.githubusercontent.com/triton-io/triton/main/docs/tutorial/v1/nginx-service.yaml
 ```
 
 ## Verify DeployFlow Started
