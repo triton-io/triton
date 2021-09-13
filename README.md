@@ -6,10 +6,6 @@
 
 English | [简体中文](./README-zh_CN.md)
 
-|![notification] What is NEW!|
-|------------------|
-[related articles](https://mp.weixin.qq.com/s/CAFNxnKkS5PjeE8ywfoQqQ)
-
 ## Introduction
 
 Triton provides a cloud-native DeployFlow, which is safe, controllable, and policy-rich.
