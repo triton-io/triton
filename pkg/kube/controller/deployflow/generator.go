@@ -26,6 +26,8 @@ import (
 )
 
 func generate(idl *internaldeploy.Deploy) *kruiseappsv1alpha1.CloneSet {
+	// always hold the create, let Deploy controller to make progress
+	var replicas int32 = 0
 
 	template := idl.Spec.Application.Template
 	template.Labels = idl.GetCloneSetLabels()
@@ -39,7 +41,7 @@ func generate(idl *internaldeploy.Deploy) *kruiseappsv1alpha1.CloneSet {
 			Labels:    idl.GetCloneSetLabels(),
 		},
 		Spec: kruiseappsv1alpha1.CloneSetSpec{
-			Replicas:       idl.Spec.Application.Replicas,
+			Replicas:       &replicas,
 			Selector:       &metav1.LabelSelector{MatchLabels: idl.GetCloneSetLabels()},
 			Template:       template,
 			UpdateStrategy: getDefaultStrategy(),
