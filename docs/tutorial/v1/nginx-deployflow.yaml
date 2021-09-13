@@ -39,7 +39,7 @@ spec:
     canary: 1 # the number of canary batch
     mode: auto # the mode is auto after canary batch
     
------
+---
 apiVersion: v1
 kind: Service
 metadata:
