@@ -36,6 +36,7 @@ spec:
             resources: {}
   updateStrategy:
     batchSize: 1
+    batchIntervalSeconds: 10,
     canary: 1 # the number of canary batch
     mode: auto # the mode is auto after canary batch
     
