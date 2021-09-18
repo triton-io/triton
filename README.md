@@ -8,7 +8,7 @@ English | [简体中文](./README-zh_CN.md)
 
 ## Introduction
 
-Triton provides a cloud-native DeployFlow, which is safe, controllable, and policy-rich.
+Triton provides a Cloud-Native DeployFlow, which is safe, controllable, and policy-rich.
 
 For more introduction details, see [Overview docs](./docs/README.md)
 
@@ -16,7 +16,7 @@ For more introduction details, see [Overview docs](./docs/README.md)
 
 - **Canary Deploy**
 
-   Triton support `Canary` deploy strategy and provide a k8s service-based traffic pull-in and pull-out solution. 
+   Triton support `Canary` deploy strategy and provide a Kubernetes service-based traffic pull-in and pull-out solution. 
 
 - **Deploy in batches**
 
@@ -24,15 +24,15 @@ For more introduction details, see [Overview docs](./docs/README.md)
 
 - **REST && GRPC API**
 
-   Triton provides many APIs to make deploy easy, such as `Next`, `Cancel`,`Pause`,`Resume`,`Scale`, `Gets`,`Restart` etc. 
+   Triton provides many APIs to make deploy easy, such as `Next`, `Cancel`, `Pause`, `Resume`, `Scale`, `Gets`, `Restart` etc. 
 
 - **Selective pods to scale/restart**
 
-  User can scale selective pods or restart these pods.
+  Users can scale or restart selective pods.
 
 - **Base on OpenKruise**
 
-  Triton use [OpenKruise](https://openkruise.io/en-us/docs/what_is_openkruise.html) as workloads which have more powerful capabilities
+  Triton use [OpenKruise](https://openkruise.io/en-us/docs/what_is_openkruise.html) as workloads which have more powerful capabilities.
 
 - **...**
 
