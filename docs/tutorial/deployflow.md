@@ -6,9 +6,10 @@ This tutorial walks you through an example to deploy a Nginx application using D
 
 1. make sure `kube-apiserver` could connect to your local machine.
 2. make sure the `OpenKruise` has been installed in your cluster. If not, install it according to [this doc](https://openkruise.io/en-us/docs/installation.html).
-3. make sure the `DeployFlow` CRD has been installed in your cluster. If not, install it by `make install`.
-4. make sure the `Triton controller` running.
-5. make sure you have install [grpcurl](https://github.com/fullstorydev/grpcurl)
+3. create namespace `triton-system` by `kubectl create ns triton-system`
+4. make sure the `DeployFlow` CRD has been installed in your cluster. If not, install it by `make install`.
+5. make sure the `Triton controller` running by `make run`.
+6. make sure you have install [grpcurl](https://github.com/fullstorydev/grpcurl)
 
 ## Create the Nginx DeployFlow
 
