@@ -39,7 +39,9 @@ For more introduction details, see [Overview docs](./docs/README.md)
 ## Quick Start
 
 For a Kubernetes cluster with its version higher than v1.13, you can simply install Triton with helm v3.1.0+:
-// TODO
+```bash
+ helm install triton.io https://github.com/triton-io/triton/releases/download/v0.1.1/triton-0.1.1.tgz
+```
 
 Note that installing this chart directly means it will use the default template values for the triton-manager.
 

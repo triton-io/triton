@@ -1,3 +1,10 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    control-plane: controller-manager
+  name: {{ .Values.installation.namespace }}
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -38,17 +45,20 @@ spec:
             - name: http
               containerPort: 8088
               protocol: TCP
+            - name: health
+              containerPort: 8000
+              protocol: TCP
             - name: grpc
               containerPort: 8099
               protocol: TCP
           livenessProbe:
             httpGet:
               path: /healthz
-              port: http
+              port: health
           readinessProbe:
             httpGet:
-              path: /healghz
-              port: http
+              path: /healthz
+              port: health
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
