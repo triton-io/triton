@@ -64,12 +64,6 @@ You are warmly welcome to hack on Triton. We have prepared a detailed guide [CON
 
 Active communication channels:
 
-- WeChat Group: 
-
-<div>
-  <img src="docs/img/triton-dev-group.JPG" width="280" title="wechat">
-</div>
-
 
 ## RoadMap
 * [ ] Support custom traffic pull-in
